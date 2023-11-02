@@ -1,0 +1,54 @@
+import requests
+from dataclasses import dataclass
+
+# Define the URL and the authentication token
+url = "https://api.zerotier.com/api/v1/network/8056c2e21ca4195f/member"
+headers = {
+    "Authorization": "Bearer EIfGCsfLy2wypMlK00la2g1ipOKMbJC4",
+}
+
+@dataclass
+class Device:
+    name: str
+    vpn_ip: str
+    phy_ip: str
+
+# Send the GET request
+response = requests.get(url, headers=headers)
+
+# Initialize a list to store Device objects
+device_list = []
+
+# Check if the request was successful (status code 200)
+if response.status_code == 200:
+    data = response.json()  # Parse the JSON response
+
+    # Extract the relevant information from each member in the response
+    for member in data:
+        description = member.get("description")
+        config = member.get("config")
+        physical_address = member.get("physicalAddress")
+        
+        if config:
+            ip_assignments = config.get("ipAssignments")
+            
+            # Create a Device object and add it to the list
+            device = Device(name=description, vpn_ip=ip_assignments[0], phy_ip=physical_address)
+            device_list.append(device)
+        else:
+            print("No 'config' object found for the member.")
+else:
+    print("Error:", response.status_code)
+
+# Print the list of Device objects
+for device in device_list:
+    print(device.name)
+    if device.name == 'p0int3ers tablet':
+        print("Name:", device.name , ',')
+        print("VPN IP:", device.vpn_ip)
+        print("Physical IP:", device.phy_ip)
+        print()
+
+
+#==item = 2
+#print(device_list[item].name,',', device_list[item].vpn_ip,',', device_list[item].phy_ip)
